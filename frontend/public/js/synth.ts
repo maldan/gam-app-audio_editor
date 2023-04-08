@@ -4,6 +4,7 @@ class AudioChannel {
   public realFrequency = 440;
   public sampleRate = 44100;
   public volume = 0.25;
+  public dutyCycle = 0;
 
   constructor(sampleRate: number) {
     this.sampleRate = sampleRate;
@@ -15,7 +16,7 @@ class AudioChannel {
 
   public doSquare(t: number): number {
     let x = this.doSin(t);
-    if (x > 0) {
+    if (x > this.dutyCycle) {
       return 1;
     } else {
       return -1;

@@ -1,6 +1,15 @@
 <template>
   <div :class="$style.main">
-    <div :class="[$style.key, x.length > 1 ? $style.dark : null]" v-for="x in keys" :key="x">{{ x }}{{ octave }}</div>
+    <div
+      :class="[$style.key, x.length > 1 ? $style.dark : null]"
+      v-for="x in keys"
+      :style="{
+        height: NoteHeight + 'px',
+      }"
+      :key="x"
+    >
+      {{ x }}{{ octave }}
+    </div>
   </div>
 </template>
 
@@ -8,6 +17,8 @@
 // Stores
 
 // Vars
+import { NoteHeight } from '@/const';
+
 const props = defineProps<{
   octave: number;
 }>();
@@ -31,11 +42,11 @@ const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].r
     align-items: center;
 
     height: 20px;
-    padding: 3px;
+    padding-left: 5px;
     width: 64px;
     background-color: #cbcbcb;
     color: #1b1b1b;
-    font-size: 14px;
+    font-size: 12px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.9);
 
     &.dark {

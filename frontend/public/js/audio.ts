@@ -39,6 +39,7 @@ export const NoteFrequency: number[] = [
 export class MegaAudio {
   static _audioContext: AudioContext;
   static _player: AudioWorkletNode;
+  static _analyzer: AnalyserNode;
 
   static async init() {
     // @ts-ignore
@@ -64,7 +65,16 @@ export class MegaAudio {
       sampleRate: this._audioContext.sampleRate,
       synthText,
     });
-    this._player.connect(this._audioContext.destination);
+
+    this._analyzer = this._audioContext.createAnalyser();
+    this._player.connect(this._analyzer);
+    this._analyzer.connect(this._audioContext.destination);
+  }
+
+  static capture(): Uint8Array {
+    const dataArray = new Uint8Array(this._analyzer.frequencyBinCount);
+    this._analyzer.getByteTimeDomainData(dataArray);
+    return dataArray;
   }
 
   static sendData(data: any) {

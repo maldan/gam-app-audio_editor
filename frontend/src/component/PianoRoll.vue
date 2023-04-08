@@ -3,15 +3,15 @@
     <div
       @click="setNote($event, 11 - i)"
       :class="[$style.key, x.length > 1 ? $style.dark : null]"
-      :style="{ width: 256 * 4 + 'px' }"
+      :style="{ width: 256 * size + 'px', height: NoteHeight + 'px' }"
       v-for="(x, i) in keys"
       :key="x"
     ></div>
 
     <!-- Lines -->
-    <div v-for="x in 4 * 4 * 4" :key="x" :class="$style.line" :style="{ left: x * 16 + 'px' }"></div>
-    <div v-for="x in 4 * 4" :key="x" :class="$style.line" :style="{ left: x * 64 + 'px' }"></div>
-    <div v-for="x in 4" :key="x" :class="$style.line" :style="{ left: x * 256 + 'px' }"></div>
+    <div v-for="x in size * 16" :key="x" :class="$style.line" :style="{ left: x * 16 + 'px' }"></div>
+    <div v-for="x in size * 4" :key="x" :class="$style.line" :style="{ left: x * 64 + 'px' }"></div>
+    <div v-for="x in size" :key="x" :class="$style.line" :style="{ left: x * 256 + 'px' }"></div>
 
     <!-- Notes -->
     <div
@@ -21,10 +21,11 @@
       :class="[$style.note, trackStore.selectedNotes.includes(x) ? $style.selected : null]"
       v-for="x in noteList"
       :style="{
-        background: x.instrument.color,
+        background: trackStore.instrumentList.find((instrument) => instrument.name === x.instrumentName)?.color,
         left: x.position * 256 + 'px',
-        top: (11 - x.note) * 20 + 2 + 'px',
+        top: (11 - x.note) * NoteHeight + 2 + 'px',
         width: x.length * 256 + 'px',
+        height: NoteHeight - 4 + 'px',
       }"
       :key="x"
     >
@@ -37,7 +38,7 @@
 import { computed, onMounted } from 'vue';
 import type { INote } from '@/store/track';
 import { useTrackStore } from '@/store/track';
-import { NoteSmallestSection } from '@/const';
+import { NoteHeight, NoteSmallestSection } from '@/const';
 
 // Stores
 const trackStore = useTrackStore();
@@ -45,6 +46,7 @@ const trackStore = useTrackStore();
 // Vars
 const props = defineProps<{
   octave: number;
+  size: number;
 }>();
 const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].reverse();
 const noteList = computed(() => {
@@ -56,17 +58,19 @@ onMounted(() => {});
 
 // Methods
 function setNote(e: MouseEvent, note: number) {
+  if (!trackStore.currentInstrument) return;
+
   const t = e.target as HTMLDivElement;
   let position = (e.pageX - t.getBoundingClientRect().x) / 256;
   position = Math.floor(position / NoteSmallestSection) * NoteSmallestSection;
 
   trackStore.noteList.push({
     id: Math.random() + 'x',
-    instrument: trackStore.currentInstrument,
+    instrumentName: trackStore.currentInstrument.name,
     octave: props.octave,
     note,
     position,
-    length: 0.25,
+    length: trackStore.currentNoteSize,
   });
 }
 
@@ -88,6 +92,7 @@ function deleteNote(note: INote) {
 function selectNote(note: INote) {
   trackStore.selectedNotes.length = 0;
   trackStore.selectedNotes.push(note);
+  trackStore.currentNoteSize = note.length;
 }
 </script>
 
@@ -109,7 +114,7 @@ function selectNote(note: INote) {
     width: 256px;
     background-color: rgba(255, 255, 255, 0.1);
     color: #2b2b2b;
-    font-size: 14px;
+    font-size: 12px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.9);
 
     cursor: pointer;
@@ -129,6 +134,7 @@ function selectNote(note: INote) {
     left: 0;
     top: 0;
     border: 1px solid rgba(0, 0, 0, 0.2);
+    pointer-events: none;
   }
 
   .note {

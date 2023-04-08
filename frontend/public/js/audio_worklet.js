@@ -23,6 +23,7 @@ class MyAudioProcessor extends AudioWorkletProcessor {
       this.ch0.frequency = e.data.frequency;
       this.ch0.volume = e.data.volume;
       this.ch0.waveType = e.data.waveType;
+      this.ch0.dutyCycle = e.data.dutyCycle || 0;
     }
   }
 

@@ -6,7 +6,7 @@ import { NumberHelper } from '@/helper/NumberHelper';
 
 export interface INote {
   id: string;
-  instrument: IInstrument;
+  instrumentName: string;
   octave: number;
   note: number;
   position: number;
@@ -14,16 +14,21 @@ export interface INote {
 }
 
 export interface IInstrument {
+  name: string;
   color: string;
   waveType: number;
   volume: number[];
   pitch: number[];
+  dutyCycle: number[];
 }
 
 export interface ITrackStore {
   noteList: INote[];
-  currentInstrument: IInstrument;
+  instrumentList: IInstrument[];
+  currentInstrument?: IInstrument;
   selectedNotes: INote[];
+  currentNoteSize: number;
+  masterSound: number;
 }
 
 export const useTrackStore = defineStore({
@@ -31,13 +36,11 @@ export const useTrackStore = defineStore({
   state: () =>
     ({
       noteList: [],
-      currentInstrument: {
-        color: '#009900',
-        waveType: 1,
-        volume: [1, 0],
-        pitch: [1, 1.025],
-      },
+      instrumentList: [],
+      currentInstrument: undefined,
       selectedNotes: [],
+      currentNoteSize: 0.25,
+      masterSound: 50,
     } as ITrackStore),
   actions: {
     removeNote(id: string) {
@@ -49,22 +52,27 @@ export const useTrackStore = defineStore({
 
       for (let i = 0; i < this.noteList.length; i++) {
         const note = this.noteList[i];
+        const instrument = this.instrumentList.find((x) => x.name === note.instrumentName);
+        if (!instrument) continue;
+
         const position = ~~(note.position * 60);
-        const instrument = note.instrument;
         const frequency = NoteFrequency[note.octave * 12 + note.note];
         out[position] = {
           frequency,
           waveType: instrument.waveType,
-          volume: note.instrument.volume[0],
+          volume: instrument.volume[0],
         };
 
         // Change volume
         const ll = note.length * 60;
         for (let i = 0; i <= ll; i++) {
+          let dc = NumberHelper.lerp(instrument.dutyCycle[0], instrument.dutyCycle[1], i / ll);
+          dc = Math.floor(dc / 0.25) * 0.25;
           out[position + i] = {
             frequency,
             waveType: instrument.waveType,
-            volume: NumberHelper.lerp(instrument.volume[0], instrument.volume[1], i / ll),
+            volume: NumberHelper.lerp(instrument.volume[0], instrument.volume[1], i / ll) * (this.masterSound / 100),
+            dutyCycle: dc,
           };
         }
 
