@@ -1,7 +1,7 @@
 <template>
   <div @contextmenu.prevent="" :class="$style.main">
     <div
-      @click="setNote($event, i)"
+      @click="setNote($event, 11 - i)"
       :class="[$style.key, x.length > 1 ? $style.dark : null]"
       :style="{ width: 256 * 4 + 'px' }"
       v-for="(x, i) in keys"
@@ -9,21 +9,27 @@
     ></div>
 
     <!-- Lines -->
+    <div v-for="x in 4 * 4 * 4" :key="x" :class="$style.line" :style="{ left: x * 16 + 'px' }"></div>
     <div v-for="x in 4 * 4" :key="x" :class="$style.line" :style="{ left: x * 64 + 'px' }"></div>
     <div v-for="x in 4" :key="x" :class="$style.line" :style="{ left: x * 256 + 'px' }"></div>
 
+    <!-- Notes -->
     <div
       @contextmenu.prevent="deleteNote(x)"
       @wheel.prevent="resizeNote($event, x)"
-      :class="$style.note"
+      @click.stop="selectNote(x)"
+      :class="[$style.note, trackStore.selectedNotes.includes(x) ? $style.selected : null]"
       v-for="x in noteList"
       :style="{
+        background: x.instrument.color,
         left: x.position * 256 + 'px',
-        top: x.note * 20 + 1 + 'px',
+        top: (11 - x.note) * 20 + 2 + 'px',
         width: x.length * 256 + 'px',
       }"
       :key="x"
-    ></div>
+    >
+      {{ keys[11 - x.note] }}{{ x.octave }}
+    </div>
   </div>
 </template>
 
@@ -31,6 +37,7 @@
 import { computed, onMounted } from 'vue';
 import type { INote } from '@/store/track';
 import { useTrackStore } from '@/store/track';
+import { NoteSmallestSection } from '@/const';
 
 // Stores
 const trackStore = useTrackStore();
@@ -51,10 +58,11 @@ onMounted(() => {});
 function setNote(e: MouseEvent, note: number) {
   const t = e.target as HTMLDivElement;
   let position = (e.pageX - t.getBoundingClientRect().x) / 256;
-  position = Math.floor(position / 0.25) * 0.25;
+  position = Math.floor(position / NoteSmallestSection) * NoteSmallestSection;
 
   trackStore.noteList.push({
     id: Math.random() + 'x',
+    instrument: trackStore.currentInstrument,
     octave: props.octave,
     note,
     position,
@@ -64,17 +72,22 @@ function setNote(e: MouseEvent, note: number) {
 
 function resizeNote(e: WheelEvent, note: INote) {
   if (e.deltaY < 0) {
-    note.length += 0.25 / 2;
+    note.length += NoteSmallestSection;
   } else {
-    note.length -= 0.25 / 2;
-    if (note.length < 0.25 / 2) {
-      note.length = 0.25 / 2;
+    note.length -= NoteSmallestSection;
+    if (note.length < NoteSmallestSection) {
+      note.length = NoteSmallestSection;
     }
   }
 }
 
 function deleteNote(note: INote) {
   trackStore.removeNote(note.id);
+}
+
+function selectNote(note: INote) {
+  trackStore.selectedNotes.length = 0;
+  trackStore.selectedNotes.push(note);
 }
 </script>
 
@@ -121,13 +134,22 @@ function deleteNote(note: INote) {
   .note {
     background-color: #3fb868;
     border-radius: 4px;
-    height: 15px;
+    height: 16px;
     position: absolute;
     left: 0;
     top: 0;
     width: 32px;
-
     cursor: pointer;
+    border: 1px solid transparent;
+    padding-left: 5px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+
+    &.selected {
+      border: 1px solid #fefefe;
+    }
 
     &:hover {
       opacity: 0.5;

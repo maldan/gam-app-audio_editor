@@ -1,8 +1,6 @@
 <template>
   <div :class="$style.main">
-    <div :class="[$style.key, x.length > 1 ? $style.dark : null]" v-for="x in keys.reverse()" :key="x">
-      {{ x }}{{ octave }}
-    </div>
+    <div :class="[$style.key, x.length > 1 ? $style.dark : null]" v-for="x in keys" :key="x">{{ x }}{{ octave }}</div>
   </div>
 </template>
 
@@ -13,7 +11,7 @@
 const props = defineProps<{
   octave: number;
 }>();
-const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].reverse();
 
 // Hooks
 
