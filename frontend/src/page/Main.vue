@@ -2,23 +2,35 @@
   <div :class="$style.main">
     <!-- Main -->
     <div :class="$style.grid">
-      <div :class="$style.pianoRoll">
-        <div :class="$style.line" v-for="x in [7, 6, 5, 4, 3, 2]" :key="x">
-          <Keyboard :octave="x" />
-          <PianoRoll :octave="x" :size="2" />
-        </div>
-      </div>
+      <!-- Channel list -->
       <div>
-        <Block :title="'Channel'"><InstrumentList /></Block>
-        <Block v-if="trackStore.currentInstrument" :title="'Channel'"><Instrument /></Block>
+        <Block :title="'Pattern list'"><PatternList /></Block>
+        <Block v-if="trackStore.currentPattern" :title="'Channel list'"><ChannelList /></Block>
+      </div>
 
-        <Block :title="'Channel'"><Channel /></Block>
+      <Block :title="'Pattern'" :style="{ height: maxHeight + 'px' }">
+        <div v-if="trackStore.currentChannel" :class="$style.pianoRoll">
+          <div :class="$style.line" v-for="x in [7, 6, 5, 4, 3, 2]" :key="x">
+            <Keyboard :octave="x" />
+            <PianoRoll :octave="x" :size="2" />
+          </div>
+
+          <!-- Line -->
+          <div
+            :class="$style.playLine"
+            :style="{ left: 64 + trackStore.currentPosition * 4.266666666666667 + 'px' }"
+          ></div>
+        </div>
+      </Block>
+
+      <div>
+        <Block :title="'Instrument List'"><InstrumentList /></Block>
+        <Block v-if="trackStore.currentInstrument" :title="'Instrument'"><Instrument /></Block>
+
+        <Block v-if="trackStore.currentChannel" :title="'Current Channel'"><Channel /></Block>
         <Block :title="'Wave Preview'"><WavePreview /></Block>
         <Block :title="'Playback'"><Playback /></Block>
       </div>
-
-      <!-- Line -->
-      <div :class="$style.playLine" :style="{ left: 64 + trackStore.currentPosition * 4.266666666666667 + 'px' }"></div>
     </div>
   </div>
 </template>
@@ -37,6 +49,8 @@ import Block from '@/component/Block.vue';
 import WavePreview from '@/component/WavePreview.vue';
 import { useMainStore } from '@/store/main';
 import Playback from '@/component/Playback.vue';
+import ChannelList from '@/component/ChannelList.vue';
+import PatternList from '@/component/PatternList.vue';
 
 // Stores
 const trackStore = useTrackStore();
@@ -44,6 +58,7 @@ const mainStore = useMainStore();
 
 // Vars
 let intervalId = 0;
+const maxHeight = ref(200);
 
 // Hooks
 onMounted(async () => {
@@ -86,7 +101,13 @@ onMounted(async () => {
   });
 
   try {
-    trackStore.noteList = JSON.parse(localStorage.getItem('notes') || '[]');
+    const x = JSON.parse(localStorage.getItem('channels') || '[]');
+    for (let i = 0; i < x.length; i++) {
+      const ch = x[i];
+      const channel = trackStore.channelList.find((x) => x.id === ch.id);
+      if (!channel) continue;
+      channel.noteList = ch.noteList;
+    }
   } catch {
     // error
   }
@@ -96,6 +117,11 @@ onMounted(async () => {
   } catch {
     // error
   }
+
+  maxHeight.value = window.innerHeight - 40;
+  window.addEventListener('resize', () => {
+    maxHeight.value = window.innerHeight - 40;
+  });
 });
 
 // Methods
@@ -107,6 +133,7 @@ onMounted(async () => {
   flex-direction: column;
   height: 100%;
   padding: 10px;
+  box-sizing: border-box;
 
   .line {
     display: flex;
@@ -114,10 +141,11 @@ onMounted(async () => {
 
   .grid {
     display: grid;
-    grid-template-columns: 1fr 280px;
-    height: calc(100% - 65px);
+    grid-template-columns: 220px 1fr 280px;
     position: relative;
     gap: 10px;
+    height: calc(100% - 20px);
+    grid-auto-rows: min-content;
 
     .playLine {
       position: absolute;
@@ -128,9 +156,8 @@ onMounted(async () => {
     }
 
     .pianoRoll {
+      position: relative;
       height: 100%;
-      overflow-y: auto;
-
       // padding: 10px;
       // background-color: rgba(0, 0, 0, 0.1);
     }

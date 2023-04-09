@@ -32,7 +32,15 @@ onMounted(() => {});
   margin-bottom: 10px;
 
   .header {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .body {
+    overflow-y: auto;
+    //height: calc(100% - 20px);
   }
 }
 </style>

@@ -50,7 +50,9 @@ const props = defineProps<{
 }>();
 const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].reverse();
 const noteList = computed(() => {
-  return trackStore.noteList.filter((x) => x.octave === props.octave);
+  const channel = trackStore.currentChannel;
+  if (!channel) return;
+  return channel.noteList.filter((x) => x.octave === props.octave);
 });
 
 // Hooks
@@ -59,12 +61,14 @@ onMounted(() => {});
 // Methods
 function setNote(e: MouseEvent, note: number) {
   if (!trackStore.currentInstrument) return;
+  const channel = trackStore.currentChannel;
+  if (!channel) return;
 
   const t = e.target as HTMLDivElement;
   let position = (e.pageX - t.getBoundingClientRect().x) / 256;
   position = Math.floor(position / NoteSmallestSection) * NoteSmallestSection;
 
-  trackStore.noteList.push({
+  channel.noteList.push({
     id: Math.random() + 'x',
     instrumentId: trackStore.currentInstrument.id,
     octave: props.octave,

@@ -2,7 +2,7 @@
   <div :class="$style.main">
     <!-- Info -->
     <div>Master volume</div>
-    <input type="number" v-model="trackStore.masterSound" />
+    <input type="number" v-model="trackStore.currentChannel.masterVolume" />
   </div>
 </template>
 

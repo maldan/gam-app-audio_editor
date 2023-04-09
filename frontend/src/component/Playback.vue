@@ -48,7 +48,7 @@ async function play() {
     mainStore.drawWave(MegaAudio.capture());
   }, 16);
 
-  localStorage.setItem('notes', JSON.stringify(trackStore.noteList));
+  localStorage.setItem('channels', JSON.stringify(trackStore.channelList));
   localStorage.setItem('instruments', JSON.stringify(trackStore.instrumentList));
 }
 

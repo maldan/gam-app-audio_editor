@@ -24,67 +24,47 @@ export interface IInstrument {
 }
 
 export interface ITrackStore {
-  noteList: INote[];
+  patternList: IPattern[];
+
+  currentChannel?: IChannel;
+  currentPattern?: IPattern;
+
   instrumentList: IInstrument[];
   currentInstrument?: IInstrument;
   selectedNotes: INote[];
+
   currentNoteSize: number;
-  masterSound: number;
   currentPosition: number;
+}
+
+export interface IChannel {
+  id: number;
+  name: string;
+  noteList: INote[];
+  masterVolume: number;
+}
+
+export interface IPattern {
+  id: string;
+  name: string;
+  channelList: IChannel[];
 }
 
 export const useTrackStore = defineStore({
   id: 'track',
   state: () =>
     ({
-      noteList: [],
+      patternList: [],
       instrumentList: [],
-      currentInstrument: undefined,
       selectedNotes: [],
       currentNoteSize: 0.25,
-      masterSound: 50,
       currentPosition: 0,
     } as ITrackStore),
   actions: {
     removeNote(id: string) {
-      this.noteList = this.noteList.filter((x) => x.id !== id);
-    },
-    compile() {
-      const out = [];
-      out.length = 60 * 2;
-
-      for (let i = 0; i < this.noteList.length; i++) {
-        const note = this.noteList[i];
-        const instrument = this.instrumentList.find((x) => x.id === note.instrumentId);
-        if (!instrument) continue;
-
-        const position = ~~(note.position * 60);
-        const frequency = NoteFrequency[note.octave * 12 + note.note];
-        out[position] = {
-          frequency,
-          waveType: instrument.waveType,
-          volume: instrument.volume[0],
-        };
-
-        // Change volume
-        const ll = note.length * 60;
-        for (let i = 0; i <= ll; i++) {
-          let dc = NumberHelper.lerp(instrument.dutyCycle[0], instrument.dutyCycle[1], i / ll);
-          dc = Math.floor(dc / 0.25) * 0.25;
-          out[position + i] = {
-            frequency,
-            waveType: instrument.waveType,
-            volume: NumberHelper.lerp(instrument.volume[0], instrument.volume[1], i / ll) * (this.masterSound / 100),
-            dutyCycle: dc,
-          };
-        }
-
-        // Change pitch
-        for (let i = 0; i <= ll; i++) {
-          out[position + i].frequency *= NumberHelper.lerp(instrument.pitch[0], instrument.pitch[1], i / ll);
-        }
-      }
-      return out;
+      const channel = this.currentChannel;
+      if (!channel) return;
+      channel.noteList = channel.noteList.filter((x) => x.id !== id);
     },
   },
 });
