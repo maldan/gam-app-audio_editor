@@ -46,13 +46,15 @@ const trackStore = useTrackStore();
 // Vars
 const props = defineProps<{
   octave: number;
-  size: number;
 }>();
 const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].reverse();
 const noteList = computed(() => {
   const channel = trackStore.currentChannel;
   if (!channel) return;
   return channel.noteList.filter((x) => x.octave === props.octave);
+});
+const size = computed(() => {
+  return trackStore.currentPattern?.length || 1;
 });
 
 // Hooks

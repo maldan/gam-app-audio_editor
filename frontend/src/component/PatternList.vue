@@ -33,6 +33,7 @@ function createPattern() {
   trackStore.patternList.push({
     id: Math.random() + '',
     name: 'sas',
+    length: 1,
     channelList: [],
   });
 }

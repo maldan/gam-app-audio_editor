@@ -5,6 +5,7 @@
       <!-- Channel list -->
       <div>
         <Block :title="'Pattern list'"><PatternList /></Block>
+        <Block v-if="trackStore.currentPattern" :title="'Pattern'"><Pattern /></Block>
         <Block v-if="trackStore.currentPattern" :title="'Channel list'"><ChannelList /></Block>
       </div>
 
@@ -12,7 +13,7 @@
         <div v-if="trackStore.currentChannel" :class="$style.pianoRoll">
           <div :class="$style.line" v-for="x in [7, 6, 5, 4, 3, 2]" :key="x">
             <Keyboard :octave="x" />
-            <PianoRoll :octave="x" :size="2" />
+            <PianoRoll :octave="x" />
           </div>
 
           <!-- Line -->
@@ -51,6 +52,7 @@ import { useMainStore } from '@/store/main';
 import Playback from '@/component/Playback.vue';
 import ChannelList from '@/component/ChannelList.vue';
 import PatternList from '@/component/PatternList.vue';
+import Pattern from '@/component/Pattern.vue';
 
 // Stores
 const trackStore = useTrackStore();
@@ -66,6 +68,8 @@ onMounted(async () => {
     trackStore.selectedNotes.length = 0;
   });
   document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (trackStore.selectedNotes.length === 0) return;
+
     if (e.code === 'ArrowRight') {
       e.preventDefault();
       trackStore.selectedNotes.forEach((x) => {

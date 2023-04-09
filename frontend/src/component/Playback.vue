@@ -25,13 +25,18 @@ onMounted(() => {});
 
 // Methods
 async function play() {
+  if (!trackStore.currentPattern) return;
   if (!trackStore.currentChannel) return;
 
   if (!MegaAudio._audioContext) {
     await MegaAudio.init();
   }
 
-  const actionList = AudioCompiler.compileChannel(trackStore.currentChannel, trackStore.instrumentList);
+  const actionList = AudioCompiler.compileChannel(
+    trackStore.currentPattern,
+    trackStore.currentChannel,
+    trackStore.instrumentList,
+  );
   trackStore.currentPosition = 0;
   clearInterval(intervalId);
 
@@ -41,10 +46,11 @@ async function play() {
       MegaAudio.sendData(actionList[~~trackStore.currentPosition]);
     }
 
-    trackStore.currentPosition += 0.6;
+    trackStore.currentPosition += 0.4;
     if (trackStore.currentPosition > actionList.length - 1) {
       trackStore.currentPosition = 0;
       clearInterval(intervalId);
+      stop();
       return;
     }
 

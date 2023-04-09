@@ -18,9 +18,11 @@ export interface IInstrument {
   name: string;
   color: string;
   waveType: number;
-  volume: number[];
-  pitch: number[];
-  dutyCycle: number[];
+
+  volumeScript: string;
+  dutyScript: string;
+  pitchScript: string;
+  arpeggioScript: string;
 }
 
 export interface ITrackStore {
@@ -48,6 +50,7 @@ export interface IPattern {
   id: string;
   name: string;
   channelList: IChannel[];
+  length: number;
 }
 
 export const useTrackStore = defineStore({
