@@ -1,7 +1,5 @@
 <template>
   <div :class="$style.main">
-    <div :class="$style.header">Channel</div>
-
     <!-- Info -->
     <div>Master volume</div>
     <input type="number" v-model="trackStore.masterSound" />
@@ -29,14 +27,7 @@ onMounted(() => {});
   display: flex;
   user-select: none;
   flex-direction: column;
-  margin-bottom: 2px;
   position: relative;
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 10px;
-
-  .header {
-    margin-bottom: 5px;
-  }
 
   .instrument {
     cursor: pointer;

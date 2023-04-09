@@ -1,6 +1,5 @@
 <template>
   <div :class="$style.main">
-    <div :class="$style.header">Instrument list</div>
     <div
       @click="selectInstrument(x)"
       :class="[$style.instrument, x.name === trackStore.currentInstrument?.name ? $style.selected : null]"
@@ -30,6 +29,7 @@ onMounted(() => {});
 // Methods
 function addNew() {
   trackStore.instrumentList.push({
+    id: Math.random() + '',
     name: 'sas ' + Math.random(),
     color: '#fe0000',
     waveType: 1,
@@ -49,14 +49,8 @@ function selectInstrument(x: IInstrument) {
   display: flex;
   user-select: none;
   flex-direction: column;
-  margin-bottom: 2px;
   position: relative;
   background-color: rgba(0, 0, 0, 0.2);
-  padding: 10px;
-
-  .header {
-    margin-bottom: 5px;
-  }
 
   .instrument {
     cursor: pointer;

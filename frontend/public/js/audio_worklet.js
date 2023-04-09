@@ -20,10 +20,10 @@ class MyAudioProcessor extends AudioWorkletProcessor {
       this.ch0 = new AudioChannel(e.data.sampleRate);
     }
     if (e.data.type === "setChannelData") {
-      this.ch0.frequency = e.data.frequency;
-      this.ch0.volume = e.data.volume;
-      this.ch0.waveType = e.data.waveType;
-      this.ch0.dutyCycle = e.data.dutyCycle || 0;
+      if (e.data.frequency !== undefined) this.ch0.frequency = e.data.frequency;
+      if (e.data.volume !== undefined) this.ch0.volume = e.data.volume;
+      if (e.data.waveType !== undefined) this.ch0.waveType = e.data.waveType;
+      if (e.data.dutyCycle !== undefined) this.ch0.dutyCycle = e.data.dutyCycle;
     }
   }
 

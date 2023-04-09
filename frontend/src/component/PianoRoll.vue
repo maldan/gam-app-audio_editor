@@ -21,7 +21,7 @@
       :class="[$style.note, trackStore.selectedNotes.includes(x) ? $style.selected : null]"
       v-for="x in noteList"
       :style="{
-        background: trackStore.instrumentList.find((instrument) => instrument.name === x.instrumentName)?.color,
+        background: trackStore.instrumentList.find((instrument) => instrument.id === x.instrumentId)?.color,
         left: x.position * 256 + 'px',
         top: (11 - x.note) * NoteHeight + 2 + 'px',
         width: x.length * 256 + 'px',
@@ -66,7 +66,7 @@ function setNote(e: MouseEvent, note: number) {
 
   trackStore.noteList.push({
     id: Math.random() + 'x',
-    instrumentName: trackStore.currentInstrument.name,
+    instrumentId: trackStore.currentInstrument.id,
     octave: props.octave,
     note,
     position,
@@ -93,6 +93,7 @@ function selectNote(note: INote) {
   trackStore.selectedNotes.length = 0;
   trackStore.selectedNotes.push(note);
   trackStore.currentNoteSize = note.length;
+  trackStore.currentInstrument = trackStore.instrumentList.find((x) => x.id === note.instrumentId);
 }
 </script>
 

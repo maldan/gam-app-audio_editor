@@ -6,7 +6,7 @@ import { NumberHelper } from '@/helper/NumberHelper';
 
 export interface INote {
   id: string;
-  instrumentName: string;
+  instrumentId: string;
   octave: number;
   note: number;
   position: number;
@@ -14,6 +14,7 @@ export interface INote {
 }
 
 export interface IInstrument {
+  id: string;
   name: string;
   color: string;
   waveType: number;
@@ -29,6 +30,7 @@ export interface ITrackStore {
   selectedNotes: INote[];
   currentNoteSize: number;
   masterSound: number;
+  currentPosition: number;
 }
 
 export const useTrackStore = defineStore({
@@ -41,6 +43,7 @@ export const useTrackStore = defineStore({
       selectedNotes: [],
       currentNoteSize: 0.25,
       masterSound: 50,
+      currentPosition: 0,
     } as ITrackStore),
   actions: {
     removeNote(id: string) {
@@ -48,11 +51,11 @@ export const useTrackStore = defineStore({
     },
     compile() {
       const out = [];
-      out.length = 60 * 4;
+      out.length = 60 * 2;
 
       for (let i = 0; i < this.noteList.length; i++) {
         const note = this.noteList[i];
-        const instrument = this.instrumentList.find((x) => x.name === note.instrumentName);
+        const instrument = this.instrumentList.find((x) => x.id === note.instrumentId);
         if (!instrument) continue;
 
         const position = ~~(note.position * 60);

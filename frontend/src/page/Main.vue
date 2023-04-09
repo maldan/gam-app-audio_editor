@@ -1,9 +1,5 @@
 <template>
   <div :class="$style.main">
-    <button @click="play">Play</button>
-
-    <canvas id="wave" width="1024" height="24" style="width: 1024px; height: 24px"></canvas>
-
     <!-- Main -->
     <div :class="$style.grid">
       <div :class="$style.pianoRoll">
@@ -13,13 +9,16 @@
         </div>
       </div>
       <div>
-        <InstrumentList style="margin-bottom: 10px" />
-        <Instrument v-if="trackStore.currentInstrument" style="margin-bottom: 10px" />
-        <Channel />
+        <Block :title="'Channel'"><InstrumentList /></Block>
+        <Block v-if="trackStore.currentInstrument" :title="'Channel'"><Instrument /></Block>
+
+        <Block :title="'Channel'"><Channel /></Block>
+        <Block :title="'Wave Preview'"><WavePreview /></Block>
+        <Block :title="'Playback'"><Playback /></Block>
       </div>
 
       <!-- Line -->
-      <div :class="$style.playLine" :style="{ left: 64 + currentPosition * 4.266666666666667 + 'px' }"></div>
+      <div :class="$style.playLine" :style="{ left: 64 + trackStore.currentPosition * 4.266666666666667 + 'px' }"></div>
     </div>
   </div>
 </template>
@@ -34,14 +33,17 @@ import { NoteSmallestSection } from '@/const';
 import InstrumentList from '@/component/InstrumentList.vue';
 import Instrument from '@/component/Instrument.vue';
 import Channel from '@/component/Channel.vue';
+import Block from '@/component/Block.vue';
+import WavePreview from '@/component/WavePreview.vue';
+import { useMainStore } from '@/store/main';
+import Playback from '@/component/Playback.vue';
 
 // Stores
 const trackStore = useTrackStore();
+const mainStore = useMainStore();
 
 // Vars
-const currentPosition = ref(0);
 let intervalId = 0;
-let canvasContext: CanvasRenderingContext2D;
 
 // Hooks
 onMounted(async () => {
@@ -94,59 +96,9 @@ onMounted(async () => {
   } catch {
     // error
   }
-
-  initCanvas();
 });
 
 // Methods
-function initCanvas() {
-  const c = document.getElementById('wave') as HTMLCanvasElement;
-  canvasContext = c.getContext('2d') as CanvasRenderingContext2D;
-
-  canvasContext.fillStyle = '#ffffff';
-  canvasContext.fillRect(0, 0, 1024, 24);
-}
-
-function drawWave(arr: Uint8Array) {
-  canvasContext.fillRect(0, 0, 1024, 24);
-
-  canvasContext.strokeStyle = '#2b2b2b';
-  for (let i = 0; i < arr.length - 1; i++) {
-    canvasContext.beginPath();
-    canvasContext.moveTo(i, (arr[i] / 255) * 24);
-    canvasContext.lineTo(i + 1, (arr[i + 1] / 255) * 24);
-    canvasContext.stroke();
-  }
-}
-
-async function play() {
-  if (!MegaAudio._audioContext) {
-    await MegaAudio.init();
-  }
-
-  const actionList = trackStore.compile();
-  currentPosition.value = 0;
-  clearInterval(intervalId);
-  console.log(actionList);
-  intervalId = setInterval(() => {
-    // Action list
-    if (actionList[~~currentPosition.value]) {
-      MegaAudio.sendData(actionList[~~currentPosition.value]);
-    }
-
-    currentPosition.value += 0.6;
-    if (currentPosition.value > actionList.length - 1) {
-      currentPosition.value = 0;
-      clearInterval(intervalId);
-      return;
-    }
-
-    drawWave(MegaAudio.capture());
-  }, 16);
-
-  localStorage.setItem('notes', JSON.stringify(trackStore.noteList));
-  localStorage.setItem('instruments', JSON.stringify(trackStore.instrumentList));
-}
 </script>
 
 <style module lang="scss">

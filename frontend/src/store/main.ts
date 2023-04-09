@@ -3,16 +3,14 @@ import Axios from 'axios';
 import { API_URL } from '@/const';
 
 export interface IMainStore {
-  test: string;
+  drawWave: (a: Uint8Array) => void;
 }
 
 export const useMainStore = defineStore({
   id: 'main',
   state: () =>
     ({
-      test: '',
+      drawWave: () => {},
     } as IMainStore),
-  actions: {
-
-  },
+  actions: {},
 });
