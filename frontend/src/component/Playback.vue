@@ -11,6 +11,7 @@ import type { IInstrument, INote } from '@/store/track';
 import { useTrackStore } from '@/store/track';
 import { MegaAudio } from '@/core/audio';
 import { useMainStore } from '@/store/main';
+import { AudioCompiler } from '@/core/AudioCompiler';
 
 // Stores
 const trackStore = useTrackStore();
@@ -24,11 +25,13 @@ onMounted(() => {});
 
 // Methods
 async function play() {
+  if (!trackStore.currentChannel) return;
+
   if (!MegaAudio._audioContext) {
     await MegaAudio.init();
   }
 
-  const actionList = trackStore.compile();
+  const actionList = AudioCompiler.compileChannel(trackStore.currentChannel, trackStore.instrumentList);
   trackStore.currentPosition = 0;
   clearInterval(intervalId);
 
@@ -48,13 +51,13 @@ async function play() {
     mainStore.drawWave(MegaAudio.capture());
   }, 16);
 
-  localStorage.setItem('channels', JSON.stringify(trackStore.channelList));
+  localStorage.setItem('patterns', JSON.stringify(trackStore.patternList));
   localStorage.setItem('instruments', JSON.stringify(trackStore.instrumentList));
 }
 
 function stop() {
   MegaAudio.sendData({
-    volume: 0,
+    setVolume: 0,
   });
   clearInterval(intervalId);
 }

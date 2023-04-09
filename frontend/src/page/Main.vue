@@ -101,13 +101,7 @@ onMounted(async () => {
   });
 
   try {
-    const x = JSON.parse(localStorage.getItem('channels') || '[]');
-    for (let i = 0; i < x.length; i++) {
-      const ch = x[i];
-      const channel = trackStore.channelList.find((x) => x.id === ch.id);
-      if (!channel) continue;
-      channel.noteList = ch.noteList;
-    }
+    trackStore.patternList = JSON.parse(localStorage.getItem('patterns') || '[]');
   } catch {
     // error
   }

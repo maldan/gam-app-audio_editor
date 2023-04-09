@@ -2,12 +2,18 @@ import { NoteFrequency } from '@/core/audio';
 import { NumberHelper } from '@/helper/NumberHelper';
 import type { IChannel, IInstrument, INote } from '@/store/track';
 
+export interface AudioCommand {
+  setFrequency?: number;
+  setVolume?: number;
+  setWaveType?: number;
+  setDutyCycle?: number;
+}
+
 export class AudioCompiler {
-  static compileChannel(channel: IChannel, instrumentList: IInstrument[]) {
+  static compileChannel(channel: IChannel, instrumentList: IInstrument[]): AudioCommand[] {
     const noteList = channel.noteList;
 
-    const out = [];
-
+    const out: AudioCommand[] = [];
     out.length = 60 * 2;
 
     for (let i = 0; i < noteList.length; i++) {
@@ -18,9 +24,9 @@ export class AudioCompiler {
       const position = ~~(note.position * 60);
       const frequency = NoteFrequency[note.octave * 12 + note.note];
       out[position] = {
-        frequency,
-        waveType: instrument.waveType,
-        volume: instrument.volume[0],
+        setFrequency: frequency,
+        setWaveType: instrument.waveType,
+        setVolume: instrument.volume[0],
       };
 
       // Change volume
@@ -29,17 +35,20 @@ export class AudioCompiler {
         let dc = NumberHelper.lerp(instrument.dutyCycle[0], instrument.dutyCycle[1], i / ll);
         dc = Math.floor(dc / 0.25) * 0.25;
         out[position + i] = {
-          frequency,
-          waveType: instrument.waveType,
-          volume: NumberHelper.lerp(instrument.volume[0], instrument.volume[1], i / ll) * (channel.masterVolume / 100),
-          dutyCycle: dc,
+          setFrequency: frequency,
+          setWaveType: instrument.waveType,
+          setVolume:
+            NumberHelper.lerp(instrument.volume[0], instrument.volume[1], i / ll) * (channel.masterVolume / 100),
+          setDutyCycle: dc,
         };
       }
 
       // Change pitch
       for (let i = 0; i <= ll; i++) {
-        out[position + i].frequency *= NumberHelper.lerp(instrument.pitch[0], instrument.pitch[1], i / ll);
+        out[position + i].setFrequency *= NumberHelper.lerp(instrument.pitch[0], instrument.pitch[1], i / ll);
       }
     }
+
+    return out;
   }
 }
