@@ -4,13 +4,13 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"github.com/maldan/gam-app-audio_editor/internal/app/audio_editor/config"
+	ms "github.com/maldan/go-ml/server"
+	ms_handler "github.com/maldan/go-ml/server/core/handler"
+	"os"
+	"strings"
 
 	"github.com/maldan/gam-app-audio_editor/internal/app/audio_editor/api"
-	"github.com/maldan/gam-app-audio_editor/internal/app/audio_editor/core"
-	"github.com/maldan/go-rapi"
-	"github.com/maldan/go-rapi/rapi_core"
-	"github.com/maldan/go-rapi/rapi_rest"
-	"github.com/maldan/go-rapi/rapi_vfs"
 )
 
 func Start(frontFs embed.FS) {
@@ -25,22 +25,27 @@ func Start(frontFs embed.FS) {
 	flag.Parse()
 
 	// Set
-	core.DataDir = *dataDir
+	wd, _ := os.Getwd()
+	wd = strings.ReplaceAll(wd, "\\", "/")
+	config.DataDir = wd + "/" + *dataDir
+	config.Host = fmt.Sprintf("%s:%d", *host, *port)
 
 	// Start server
-	rapi.Start(rapi.Config{
+	ms.Start(ms.Config{
 		Host: fmt.Sprintf("%s:%d", *host, *port),
-		Router: map[string]rapi_core.Handler{
-			"/": rapi_vfs.VFSHandler{
-				Root: "frontend/dist",
-				Fs:   frontFs,
+		Router: []ms_handler.RouteHandler{
+			{
+				Path: "/api",
+				Handler: ms_handler.API{
+					ControllerList: []any{api.Project{}},
+				},
 			},
-			"/api": rapi_rest.ApiHandler{
-				Controller: map[string]interface{}{
-					"main":   api.MainApi{},
+			{
+				Path: "/data",
+				Handler: ms_handler.FS{
+					ContentPath: config.DataDir,
 				},
 			},
 		},
-		DbPath: core.DataDir,
 	})
 }

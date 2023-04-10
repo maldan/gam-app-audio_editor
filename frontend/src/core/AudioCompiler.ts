@@ -11,7 +11,7 @@ export interface AudioCommand {
 
 export class AudioCompiler {
   static compileChannel(pattern: IPattern, channel: IChannel, instrumentList: IInstrument[]): AudioCommand[] {
-    const noteList = channel.noteList;
+    const noteList = channel.noteList.sort((a, b) => a.position - b.position);
 
     const out: AudioCommand[] = [];
     out.length = 60 * pattern.length;
@@ -81,8 +81,13 @@ export class AudioCompiler {
 
         // End of note
         if (j === noteLength - 1) {
-          out[position + j].setVolume = 0;
         }
+      }
+
+      // Set volume 0
+      for (let i = 0; i < 4; i++) {
+        if (!out[position + noteLength + i]) out[position + noteLength + i] = { setVolume: 0 };
+        out[position + noteLength + i].setVolume = 0;
       }
 
       // out[position + noteLength - 1].setVolume = 0;
@@ -106,6 +111,8 @@ export class AudioCompiler {
         out[position + i].setFrequency *= NumberHelper.lerp(instrument.pitch[0], instrument.pitch[1], i / ll);
       }*/
     }
+
+    console.log(out);
 
     return out;
   }

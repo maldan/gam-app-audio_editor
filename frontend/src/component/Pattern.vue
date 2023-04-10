@@ -3,12 +3,13 @@
     <!-- Info -->
     <div>Pattern length</div>
     <input type="number" v-model="trackStore.currentPattern.length" />
+    <div>Speed</div>
+    <input type="number" min="0.1" max="1" step="0.1" v-model="trackStore.currentPattern.speed" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import type { IInstrument, INote } from '@/store/track';
 import { useTrackStore } from '@/store/track';
 
 // Stores

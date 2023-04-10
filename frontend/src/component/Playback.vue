@@ -46,7 +46,7 @@ async function play() {
       MegaAudio.sendData(actionList[~~trackStore.currentPosition]);
     }
 
-    trackStore.currentPosition += 0.4;
+    trackStore.currentPosition += trackStore.currentPattern?.speed ?? 1;
     if (trackStore.currentPosition > actionList.length - 1) {
       trackStore.currentPosition = 0;
       clearInterval(intervalId);

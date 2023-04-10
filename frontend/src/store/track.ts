@@ -51,6 +51,7 @@ export interface IPattern {
   name: string;
   channelList: IChannel[];
   length: number;
+  speed: number;
 }
 
 export const useTrackStore = defineStore({
