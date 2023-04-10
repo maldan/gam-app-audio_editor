@@ -26,7 +26,7 @@ export const useMainStore = defineStore({
       return (await Axios.get(`${API_URL}/project/index?name=${name}`)).data;
     },
     async getList() {
-      this.projectList = await Axios.get(`${API_URL}/project/list`);
+      this.projectList = (await Axios.get(`${API_URL}/project/list`)).data;
     },
     async save(name: string, body: any) {
       await Axios.post(`${API_URL}/project/index`, {

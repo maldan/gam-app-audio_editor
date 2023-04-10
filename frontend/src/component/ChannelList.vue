@@ -7,6 +7,7 @@
       :key="x.id"
     >
       Ch #{{ x.id }} {{ x.name }}
+      <input type="checkbox" :checked="x.isMuted" @change="x.isMuted = $event.target.checked" />
     </div>
     <button @click="createChannel()">Add</button>
   </div>

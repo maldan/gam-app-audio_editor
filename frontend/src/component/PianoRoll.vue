@@ -31,6 +31,24 @@
     >
       {{ keys[11 - x.note] }}{{ x.octave }}
     </div>
+
+    <!-- Ghost notes -->
+    <div
+      :class="[$style.note, trackStore.selectedNotes.includes(x) ? $style.selected : null]"
+      v-for="x in ghostNoteList"
+      :style="{
+        background: 'rgba(255, 255, 255, 0.2)',
+        color: 'rgba(255, 255, 255, 0.2)',
+        left: x.position * 256 + 'px',
+        top: (11 - x.note) * NoteHeight + 2 + 'px',
+        width: x.length * 256 + 'px',
+        height: NoteHeight - 4 + 'px',
+        pointerEvents: 'none',
+      }"
+      :key="x"
+    >
+      {{ keys[11 - x.note] }}{{ x.octave }}
+    </div>
   </div>
 </template>
 
@@ -53,6 +71,19 @@ const noteList = computed(() => {
   if (!channel) return;
   return channel.noteList.filter((x) => x.octave === props.octave);
 });
+
+const ghostNoteList = computed(() => {
+  const pattern = trackStore.currentPattern;
+  if (!pattern) return;
+  const out: any[] = [];
+  pattern.channelList.forEach((channel) => {
+    if (channel === trackStore.currentChannel) return;
+    if (channel.isMuted) return;
+    out.push(...channel.noteList.filter((x) => x.octave === props.octave));
+  });
+  return out;
+});
+
 const size = computed(() => {
   return trackStore.currentPattern?.length || 1;
 });
@@ -159,6 +190,7 @@ function selectNote(note: INote) {
     display: flex;
     align-items: center;
     overflow: hidden;
+    text-shadow: 1px -1px 1px black;
 
     &.selected {
       border: 1px solid #fefefe;

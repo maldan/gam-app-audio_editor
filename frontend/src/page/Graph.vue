@@ -30,19 +30,20 @@ let freq = 261.63;
 let freq2 = 261.63;
 let phase = 0;
 let lastV = 0;
+let sampleRate = 44_100;
 
 // Hooks
 onMounted(async () => {
   let arr = [];
   let x = 0;
   for (let i = 0; i < 348; i++) {
-    arr.push(doSin(phase));
+    arr.push(saw(phase));
     phase += 1;
   }
-  freq = 493.88;
+  freq2 = 800;
 
-  for (let i = 0; i < 128; i++) {
-    arr.push(doSin(phase));
+  for (let i = 0; i < 348; i++) {
+    arr.push(saw(phase));
     phase += 1;
   }
 
@@ -82,6 +83,26 @@ function doSin(t: number): number {
 
   lastV = v;
   return v;
+}
+
+function doSquare(t: number): number {
+  let x = doSin(t);
+  if (x > 0) {
+    return 1;
+  } else {
+    return -1;
+  }
+}
+
+function triangle(t: number): number {
+  let ft = freq2 * (t / 44100);
+  return 4 * Math.abs(ft - Math.floor(ft + 1 / 2)) - 1;
+}
+
+function saw(t: number): number {
+  let f = freq2;
+  let tt = t / 44100;
+  return 2 * (tt % (1 / f)) * freq2 - 1;
 }
 </script>
 

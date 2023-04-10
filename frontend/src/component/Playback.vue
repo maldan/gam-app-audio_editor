@@ -31,23 +31,45 @@ async function play() {
   if (!MegaAudio._audioContext) {
     await MegaAudio.init();
   }
+  const currentPattern = trackStore.currentPattern;
+  if (!currentPattern) return;
 
-  const actionList = AudioCompiler.compileChannel(
-    trackStore.currentPattern,
-    trackStore.currentChannel,
-    trackStore.instrumentList,
-  );
+  const actionList = [];
+
+  for (let i = 0; i < currentPattern.channelList.length; i++) {
+    const channel = currentPattern.channelList[i];
+    if (channel.isMuted) {
+      actionList.push([]);
+      continue;
+    }
+    actionList.push(AudioCompiler.compileChannel(trackStore.currentPattern, channel, trackStore.instrumentList));
+  }
+
   trackStore.currentPosition = 0;
   clearInterval(intervalId);
 
+  const max = Math.max(...actionList.map((x) => x.length));
+  const finalList: any[] = [];
+  for (let i = 0; i < max; i++) {
+    const out: any = {
+      channel: [],
+    };
+
+    for (let j = 0; j < actionList.length; j++) {
+      out.channel.push({ id: j, data: actionList[j][i] || {} });
+    }
+
+    finalList.push(out);
+  }
+
   intervalId = setInterval(() => {
     // Action list
-    if (actionList[~~trackStore.currentPosition]) {
-      MegaAudio.sendData(actionList[~~trackStore.currentPosition]);
+    if (finalList[~~trackStore.currentPosition]) {
+      MegaAudio.sendData(finalList[~~trackStore.currentPosition]);
     }
 
     trackStore.currentPosition += trackStore.currentPattern?.speed ?? 1;
-    if (trackStore.currentPosition > actionList.length - 1) {
+    if (trackStore.currentPosition > finalList.length - 1) {
       trackStore.currentPosition = 0;
       clearInterval(intervalId);
       stop();
@@ -56,14 +78,24 @@ async function play() {
 
     mainStore.drawWave(MegaAudio.capture());
   }, 16);
-
-  localStorage.setItem('patterns', JSON.stringify(trackStore.patternList));
-  localStorage.setItem('instruments', JSON.stringify(trackStore.instrumentList));
 }
 
 function stop() {
   MegaAudio.sendData({
-    setVolume: 0,
+    channel: [
+      {
+        id: 0,
+        data: {
+          setVolume: 0,
+        },
+      },
+      {
+        id: 1,
+        data: {
+          setVolume: 0,
+        },
+      },
+    ],
   });
   clearInterval(intervalId);
 }

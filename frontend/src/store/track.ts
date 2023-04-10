@@ -42,6 +42,7 @@ export interface ITrackStore {
 export interface IChannel {
   id: number;
   name: string;
+  isMuted: boolean;
   noteList: INote[];
   masterVolume: number;
 }

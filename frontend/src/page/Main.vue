@@ -1,6 +1,13 @@
 <template>
   <div :class="$style.main">
-    <div v-for="x in mainStore.projectList" :key="x.name">{{ x.name }}</div>
+    <div
+      :class="$style.project"
+      @click="router.push('/project/' + x.name)"
+      v-for="x in mainStore.projectList"
+      :key="x.name"
+    >
+      {{ x.name }}
+    </div>
     <button @click="createProject">Add</button>
   </div>
 </template>
@@ -40,5 +47,15 @@ async function createProject() {
   height: 100%;
   padding: 10px;
   box-sizing: border-box;
+
+  .project {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
 }
 </style>

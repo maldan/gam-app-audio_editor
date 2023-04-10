@@ -12,9 +12,14 @@ export interface AudioCommand {
 export class AudioCompiler {
   static compileChannel(pattern: IPattern, channel: IChannel, instrumentList: IInstrument[]): AudioCommand[] {
     const noteList = channel.noteList.sort((a, b) => a.position - b.position);
+    console.log(noteList);
 
     const out: AudioCommand[] = [];
     out.length = 60 * pattern.length;
+
+    for (let i = 0; i < out.length; i++) {
+      out[i] = { setVolume: 0 };
+    }
 
     for (let i = 0; i < noteList.length; i++) {
       const note = noteList[i];
@@ -27,7 +32,7 @@ export class AudioCompiler {
       const noteLength = ~~(note.length * 60);
       const masterVolume = channel.masterVolume / 100;
 
-      for (let j = 0; j < noteLength; j++) {
+      for (let j = 0; j <= noteLength; j++) {
         const noteProgress = j / noteLength;
         const time = note.position * 60 + j;
 
@@ -78,37 +83,13 @@ export class AudioCompiler {
           // @ts-ignore
           out[position + j].setFrequency = NoteFrequency[noteId + ~~fn(noteProgress, time)];
         }
-
-        // End of note
-        if (j === noteLength - 1) {
-        }
       }
 
       // Set volume 0
-      for (let i = 0; i < 4; i++) {
-        if (!out[position + noteLength + i]) out[position + noteLength + i] = { setVolume: 0 };
-        out[position + noteLength + i].setVolume = 0;
-      }
-
-      // out[position + noteLength - 1].setVolume = 0;
-
-      // Change volume
-      /*
-      for (let i = 0; i <= ll; i++) {
-        let dc = NumberHelper.lerp(instrument.dutyCycle[0], instrument.dutyCycle[1], i / ll);
-        dc = Math.floor(dc / 0.25) * 0.25;
-        out[position + i] = {
-          setFrequency: frequency,
-          setWaveType: instrument.waveType,
-          setVolume:
-            NumberHelper.lerp(instrument.volume[0], instrument.volume[1], i / ll) * (channel.masterVolume / 100),
-          setDutyCycle: dc,
-        };
-      }
-
-      // Change pitch
-      for (let i = 0; i <= ll; i++) {
-        out[position + i].setFrequency *= NumberHelper.lerp(instrument.pitch[0], instrument.pitch[1], i / ll);
+      /*console.log(position, noteLength);
+      for (let j = 0; j < 1; j++) {
+        if (!out[position + noteLength + j]) out[position + noteLength + j] = { setVolume: 0 };
+        out[position + noteLength + j].setVolume = 0;
       }*/
     }
 

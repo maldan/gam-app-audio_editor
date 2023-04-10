@@ -36,7 +36,7 @@ func (r Project) GetIndex(args ArgsProject) map[string]any {
 
 // GetList of reference
 func (r Project) GetList() []db.Project {
-	files, _ := ml_fs.ListAll(config.DataDir + "/project")
+	files, _ := ml_fs.List(config.DataDir + "/project")
 	out := make([]db.Project, 0)
 	for _, file := range files {
 		relativePath := strings.Replace(file.FullPath, config.DataDir, "", 1)
@@ -46,7 +46,6 @@ func (r Project) GetList() []db.Project {
 
 		ref := db.Project{
 			Name: file.Name,
-			Url:  "http://" + config.Host + "/data" + relativePath,
 		}
 
 		out = append(out, ref)
